@@ -1,0 +1,1252 @@
+procedure ROSA00_A
+parameter FUNC
+FUNC = UPPER(FUNC)
+TSA_NO = WSA_NO
+do WHILE .T.
+   MSG00 = ''
+   MSG01 = ''
+   @ 23, 0 CLEAR
+   @ 23,(80-len(msg00))/2  say msg00 colo &co_key
+   @ 24,(80-len(msg00))/2  say msg01 colo &co_key
+   select 1
+   SCOR = .F.
+   if FUNC$'EA'
+      store SPACE(LEN(SA_NO)) TO WSA_NO
+      store SPACE(LEN(CU_NO)) TO WCU_NO, WCU_SALE, WDP_NO, WSA_BIL, WOD_NO, WSA_SHIP, WIV_CUNO
+      store SPACE(LEN(CU_NO)) TO WSA_AGENT
+      store '2' TO WSA_ADID
+      store SPACE(LEN(SA_ADDR)) TO WSA_ADDR
+      store SPACE(LEN(SA_ADDR1)) TO WSA_ADDR1
+      store YMD TO WSA_DATE
+      store SPACE(LEN(OD_ID)) TO WOD_ID, FOD_ID
+      store 0.000 TO WSA_RATE, FSA_RATE
+      store 0 TO WSA_AMT, WSA_PRE, WSA_TAX, WSA_OTHE, WIV_AMT
+      store 0 TO WSA_COMM, WSA_CAMT, WSA_CHECK
+      store '3' TO WSA_TAXID, WSA_CHARG
+      store ' ' TO WSA_CHARG1, WSA_ADDR, WSA_SURE
+      store '1' TO WOD_SATYP, WSA_ID
+      store SPACE(LEN(SA_CHDAT)) TO WSA_CHDAT, WSA_LTDAT, WSA_SIGN
+      store 0 TO WIV_PAGE
+      store SPACE(LEN(SA_IVNO)) TO WSA_IVNO
+      store SPACE(LEN(SA_IVNO1)) TO WSA_IVNO1
+      store SPACE(LEN(SA_LCNO)) TO WSA_LCNO, FSA_LCNO
+      store SPACE(LEN(BN_ID)) TO WBN_ID
+      store SPACE(LEN(SA_VIA)) TO WSA_VIA
+      store SPACE(LEN(SA_CONDI)) TO WSA_CONDI
+      store SPACE(LEN(SA_SHIPNO)) TO WSA_SHIPNO
+      @ 4, 12 CLEAR TO 10, 26
+      @ 4, 36 CLEAR TO 10, 53
+      @ 4, 63 CLEAR TO 10, 74
+      @ 9, 32 SAY SPACE(20)
+      @ 10, 12 SAY SPACE(40)
+      @ 21, 8 SAY SPACE(11)
+      @ 21, 29 SAY SPACE(11)
+      @ 21, 46 SAY SPACE(11)
+      @ 21, 67 SAY SPACE(10)
+      set colo to &co_form
+      @ 6, 1 SAY '│發票對象:            聯 發票號碼:                  課 稅 別:              │'
+      @ 9, 1 SAY '│貨款期限:          報單:                           業務部門:              │'
+      set colo to &co_say
+      @ TRX_BEG+1, 6 CLEAR TO TRX_BEG+TRX_LIM*2, 76
+      set color to &co_form
+      @ 9, 22 SAY '報單:'
+      set color to &co_say
+      @ 21, 8 SAY WSA_AMT PICTURE '99999999.99'
+      @ 21, 29 SAY WSA_PRE PICTURE '99999999.99'
+      @ 21, 46 SAY WSA_TAX PICTURE '99999999.99'
+      @ 21, 67 SAY WSA_OTHE PICTURE '9999999.99'
+      FSA_ACAMT = 0
+      CNT = 1
+   else
+      store SA_NO TO WSA_NO
+      store CU_NO TO WCU_NO
+      store CU_SALE TO WCU_SALE
+      store SA_ADID TO WSA_ADID
+      store SA_ADDR TO WSA_ADDR
+      store SA_DATE TO WSA_DATE
+      store OD_ID TO WOD_ID, FOD_ID
+      store SA_RATE TO WSA_RATE, FSA_RATE, TSA_RATE
+      store SA_AMT TO WSA_AMT, FSA_AMT
+      store SA_PRE TO WSA_PRE, FSA_PRE
+      store SA_TAX TO WSA_TAX, FSA_TAX
+      store SA_OTHE TO WSA_OTHE, FSA_OTHE
+      store SA_TAXID TO WSA_TAXID, FSA_TAXID
+      store SA_SIGN TO WSA_SIGN
+      store SA_CHARG TO WSA_CHARG, FSA_CHARG
+      store SA_CHARG1 TO WSA_CHARG1
+      store SA_CHDAT TO WSA_CHDAT, FSA_CHDAT
+      store SA_LTDAT TO WSA_LTDAT
+      store SA_IVNO TO WSA_IVNO
+      store SA_IVNO1 TO WSA_IVNO1
+      store SA_LCNO TO WSA_LCNO, FSA_LCNO
+      store OD_SATYP TO WOD_SATYP
+      store SA_BIL TO WSA_BIL, FSA_BIL
+      store IV_PAGE TO WIV_PAGE
+      store SA_ID TO WSA_ID, FSA_ID
+      store SA_ADDR1 TO WSA_ADDR1
+      store SA_VIA TO WSA_VIA
+      store BN_ID TO WBN_ID
+      store SA_CONDI TO WSA_CONDI
+      store DP_NO TO WDP_NO
+      store SA_SURE TO WSA_SURE
+      store SA_CHECK TO WSA_CHECK
+      store IV_AMT TO WIV_AMT
+      store SA_COMM TO WSA_COMM
+      store SA_CAMT TO WSA_CAMT
+      store SA_AGENT TO WSA_AGENT
+      store SA_SHIPNO TO WSA_SHIPNO
+      store SA_SHIP TO WSA_SHIP
+      store IV_CUNO TO WIV_CUNO
+      FSA_ACAMT = SA_AMT+SA_TAX+SA_OTHE-SA_PRE
+      SV_REC = RECNO()
+   endif
+   P_COD = 1
+   FLG_HD = .F.
+   do WHILE .T.
+      R_COD = P_COD
+      select 1
+      do CASE
+         case R_COD=0
+            select 1
+            unlock
+            return
+         case R_COD=1
+            if FUNC='E'
+               @ 4, 12 GET WSA_NO PICTURE '!!!!!!!!!'
+               read
+               @ 4, 12 SAY WSA_NO PICTURE '!!!!!!!!!'
+               do CHK_PCOD WITH P_COD
+               if &rd_up .or. &rd_esc
+                  loop
+               endif
+               if WSA_NO=SPACE(LEN(WSA_NO))
+                  do CHK_MSG WITH '單號不得空白'
+                  P_COD = 1
+                  loop
+               endif
+               select 1
+               seek WSA_NO
+               if  .not. EOF()
+                  P_COD = 1
+                  do CHK_MSG WITH '單號不得重覆'
+                  loop
+               endif
+            else
+               P_COD = P_COD+1
+            endif
+         case R_COD=2
+            if FUNC$'EA'
+               select CU00
+               WINF = 'F'
+               TITAL = '客戶代號 客戶簡稱'
+               TITAL1 = '======== ========'
+               do CHK_WIN WITH 25, 'cu_no', 'space(03)+cu_na', 4, 36, WINF, WCU_NO
+               if WINF='M'
+                  P_COD = 0
+                  loop
+               endif
+               R_FLG = .F.
+               do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+               if R_FLG
+                  seek WCU_NO
+                  @ 4, 36 SAY CU_NO+' '+CU_NA
+                  loop
+               endif
+               @ 4, 36 SAY CU_NO+' '+CU_NA
+               TCU_NO = CU_NO
+               WCU_DATE = CU_DATE
+               TCU_DATE = VAL(WCU_DATE)
+               WSA_ADID = CU_POAR
+               WCU_NO = CU_NO
+               WSA_BIL = CU_NO
+               WSA_CHARG = CU_CHARG
+               WSA_CHECK = CU_CHECK
+               WSA_ADID = CU_POAR
+               WCU_AGENT = CU_NO
+               WCU_SALE = CU_SALE
+               WOD_ID = OD_ID
+               select OD00
+               seek WOD_ID
+               WSA_RATE = OD_RATE
+               select CU00
+            else
+               select CU00
+               seek WCU_NO
+               WCU_NO = CU_NO
+               WCU_DATE = CU_DATE
+               TCU_DATE = VAL(WCU_DATE)
+               P_COD = P_COD+1
+            endif
+         case R_COD=3
+            P_COD = P_COD+1
+         case R_COD=4
+            FLG_HD = .F.
+            if FUNC$'EA' .and. IE_SAINP='1'
+               select OD01
+               set ORDER TO rood01_3
+               set RELATION TO OD_SERNO INTO OD02
+               TITAL = '批 號 料  品  編  號  客戶訂單號碼   預定交期 幣別 確認 訂單餘量'
+               TITAL1 = '===== =============== ============== ======== ==== ==== ========'
+               WINF = 'F'
+               do CHK_WINZ WITH LEN(TITAL)+2, 'od_no', "el_no+' '+od_po_no+' '+od_redat+' '+od_id+'   '               +od02->od_sure+'   '+str(od_qty-od_dlqty-od_que+od_bkqty,8,1)", 14, 10, WINF, WOD_NO, 'cu_no,wcu_no'
+               @ 14, 10 SAY OD_NO
+               do CHK_PCOD WITH P_COD
+               if WINF$'E'
+                  P_COD = 0
+                  @ 14, 10 SAY SPACE(5)
+                  set RELATION TO
+                  set ORDER TO rood01_1 IN OD01
+                  loop
+               endif
+               if WINF$'RU'
+                  R_COD = 2
+                  set RELATION TO
+                  set ORDER TO rood01_1 IN OD01
+                  loop
+               endif
+               if WINF$'SMN'
+                  FLG_HD = .T.
+                  WOD_NO = SPACE(5)
+                  @ 14, 10 SAY SPACE(5)
+               else
+                  select OD01
+                  if OD_QTY-OD_DLQTY-OD_QUE+OD_BKQTY<=0
+                     do CHK_MSG WITH '此訂單已無待出貨量!!'
+                     P_COD = R_COD
+                     set RELATION TO
+                     set ORDER TO rood01_1 IN OD01
+                     loop
+                  endif
+                  WOD_NO = OD_NO
+                  WOD_SERNO = OD_SERNO
+                  select OD02
+                  seek WOD_SERNO
+                  if OD_SURE#'Y'
+                     do CHK_MSG WITH '此訂單未經確認不得申請出貨!!'
+                     P_COD = R_COD
+                     set RELATION TO
+                     set ORDER TO rood01_1 IN OD01
+                     loop
+                  endif
+                  if OD_CHARG1='5' .and. EMPTY(OD_LC_NO) .and. IE_LCYN='Y'
+                     do CHK_MSG WITH '此訂單未收到客戶 L/C 不可出貨!!'
+                     P_COD = R_COD
+                     set RELATION TO
+                     set ORDER TO rood01_1 IN OD01
+                     loop
+                  endif
+                  @ 14, 10 SAY WOD_NO
+                  WCU_NO = CU_NO
+                  WSA_ADID = OD_ADID
+                  WSA_ADDR = OD_ADDR
+                  WSA_ADDR1 = OD_ADDR1
+                  WOD_ID = OD_ID
+                  WSA_RATE = OD_RATE
+                  WSA_TAXID = OD_TAXID
+                  WSA_CHARG = OD_CHARG
+                  WSA_CHARG1 = OD_CHARG1
+                  WOD_SATYP = OD_SATYP
+                  WSA_BIL = OD_BIL
+                  WSA_FRG = OD_FRG
+                  WCU_SALE = CU_SALE
+                  WSA_CONDI = OD_CONDI
+                  WDP_NO = DP_NO
+                  WCU_AGENT = OD_AGENT
+                  WSA_LCNO = OD_LC_NO
+                  WSA_CHECK = OD_CHECK
+                  WSA_COMM = OD_COMM
+                  WSA_AGENT = OD_AGENT
+                  WSA_SHIP = SA_SHIP
+               endif
+               select OD01
+               set RELATION TO
+               set ORDER TO rood01_1 IN OD01
+            else
+               P_COD = P_COD+1
+            endif
+            if IE_SAINP='2' .and. FUNC$'AE'
+               FLG_HD = .T.
+            endif
+         case R_COD=5
+            ERR_FLG = ' '
+            do CHK_GETD WITH 4, 63, WSA_DATE, .F., R_COD, ERR_FLG
+         case R_COD=6
+            @ 5, 12 SAY SPACE(4)
+            select AR08
+            WINF = 'F'
+            TITAL = '識別碼 說      明 借方科目代號 貸方科目代號'
+            TITAL1 = '====== ========== ============ ============'
+            do CHK_WINX WITH LEN(TITAL1)+2, 'ar_reid', "+space(5)+ar_dsp+' '+ac_no1+'    '+ac_no2", 5, 12, WINF, WSA_ID, 'ar_reno,war_reno'
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+            if R_FLG
+               seek WAR_RENO+WSA_ID
+               @ 5, 12 SAY SUBSTR(AR_DSP,1,4)
+               loop
+            endif
+            if AR_REID='3'
+               do CHK_MSG WITH '借貨請由庫存系統之借調出庫處理!!'
+               P_COD = R_COD
+               loop
+            endif
+            @ 5, 12 SAY SUBSTR(AR_DSP,1,4)
+            WSA_ID = AR_REID
+            WAC_NO1 = AC_NO1
+            WAC_NO2 = AC_NO2
+         case R_COD=7
+            select CU00
+            WINF = 'F'
+            TITAL = '客戶代號 客戶簡稱'
+            TITAL1 = '======== ========'
+            do CHK_WIN WITH 25, 'cu_no', 'space(03)+cu_na', 5, 36, WINF, WSA_BIL
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+            if R_FLG
+               seek WSA_BIL
+               @ 5, 36 SAY CU_NO+' '+CU_NA
+               loop
+            endif
+            @ 5, 36 SAY CU_NO+' '+CU_NA
+            WSA_BIL = CU_NO
+            if FUNC$'EA'
+               WIV_CUNO = CU_NO
+            endif
+            WCU_UNIT = CU_UNIT
+            if FLG_HD
+               WCU_DATE = CU_DATE
+               TCU_DATE = VAL(CU_DATE)
+               if FUNC$'AE'
+                  WSA_CHECK = CU_CHECK
+               endif
+               WSA_TAXID = CU_TAXID
+               WSA_CHARG = CU_CHARG
+               WSA_CHARG1 = CU_CHARG1
+               WSA_CONDI = CU_CONDI
+            else
+            endif
+         case R_COD=8
+            @ 5, 63 SAY SPACE(8)
+            do CHK_MSG WITH '內外銷別:(1) 內 銷 (2) 外 銷 (3) 合作外銷 (4)轉口貿易 ', 's', '', 0, 0, 0
+            do CHK_GETC WITH 5, 64, WOD_SATYP, '9', '(1234)'
+            deactivate WINDOW WIN_MSG
+            release WINDOW WIN_MSG
+            @ 5, 63 SAY SUBSTR('    　　內銷　　外銷　　合作外銷轉口貿易',VAL(WOD_SATYP)*8+1,8)
+            if FUNC$'AE'
+               if WOD_SATYP='1' .and. WSA_TAXID='3'
+                  WIV_PAGE = 3
+               else
+                  WIV_PAGE = 2
+               endif
+            endif
+         case R_COD=9
+            select CU00
+            WINF = 'F'
+            TITAL = '客戶代號 客戶簡稱'
+            TITAL1 = '======== ========'
+            do CHK_WIN WITH 25, 'cu_no', 'space(03)+cu_na', 6, 12, WINF, WIV_CUNO
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+            if R_FLG
+               seek WSA_BIL
+               @ 6, 12 SAY SUBSTR(CU_NA,1,8)
+               loop
+            endif
+            @ 6, 12 SAY SUBSTR(CU_NA,1,8)
+            WIV_CUNO = CU_NO
+         case R_COD=10
+            TIV_PAGE = STR(WIV_PAGE,1)
+            if WIV_PAGE=0
+               TIV_PAGE = ' '
+            endif
+            do CHK_GETC WITH 6, 22, TIV_PAGE, '9', '( 023)'
+            WIV_PAGE = VAL(TIV_PAGE)
+         case R_COD=11
+            dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+            = SET_DBF(1,DBF_FI+'roov01','roov01_1','ov01',0)
+            do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+            if ERR_USE
+               close DATABASES
+               return
+            endif
+            FLG_SS = .T.
+            select OV01
+            seek '1'+WSA_IVNO1
+            FLG_IV = .F.
+            FLG_AD = .F.
+            if  .not. EOF() .and. IV_SURE='Y'
+               FLG_SS = .F.
+            else
+               FLG_SS = .T.
+            endif
+            use IN OV01
+            if FLG_SS
+               @ 6, 36 GET WSA_IVNO1 PICTURE '@! AA99999999'
+               read
+               @ 6, 36 SAY WSA_IVNO1
+               do CHK_PCOD WITH P_COD
+               if &rd_up .or. &rd_esc
+                  loop
+               endif
+               if IE_COUNTRY='2'
+                  if WSA_IVNO1#SPACE(10)
+                     if LEN(LTRIM(RTRIM(WSA_IVNO1)))#LEN(WSA_IVNO1)
+                        do CHK_MSG WITH '單號未打滿'
+                        P_COD = R_COD
+                        loop
+                     endif
+                     dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+                     = SET_DBF(1,DBF_FI+'roov05','roov05_2','ov05',0)
+                     do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+                     if ERR_USE
+                        close DATABASES
+                        return
+                     endif
+                     select OV05
+                     FLG = .T.
+                     W_YM = CHK_GYMD(WSA_DATE,'YM',2)
+                     if IE_IVAUTO='Y'
+                        if W_YM>=IE_IVYM
+                           T_COD = '2'
+                        else
+                           T_COD = '1'
+                        endif
+                     else
+                        T_COD = '1'
+                     endif
+                     PAG = STR(WIV_PAGE,1)
+                     seek W_YM+PAG+T_COD
+                     if  .not. EOF() .and. SUBSTR(IV_NA,1,2)=SUBSTR(WSA_IVNO1,1,2)
+                        FLG = .F.
+                     else
+                        set ORDER TO roov05_4
+                        seek W_YM+PAG+T_COD
+                        if  .not. EOF() .and. SUBSTR(IV_NA,1,2)=SUBSTR(WSA_IVNO1,1,2)
+                           FLG = .F.
+                        else
+                        endif
+                     endif
+                     set ORDER TO roov05_2
+                     select OV05
+                     use
+                     if FLG
+                        if  .not. MESG_YN('本年月無此字軌, 是否存入?(Y/N)')
+                           P_COD = R_COD
+                           loop
+                        endif
+                     endif
+                  endif
+               endif
+            else
+               if &rd_up
+                  P_COD = P_COD-1
+               else
+                  P_COD = P_COD+1
+               endif
+            endif
+         case R_COD=12
+            do CHK_GTAX WITH 6, 63, WSA_TAXID, .T.
+            do CHK_STAX WITH 6, 63, WSA_TAXID
+         case R_COD=13
+            if WSA_CONDI=SPACE(LEN(WSA_CONDI))
+               dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+               = SET_DBF(1,DBF_BA+'ropb11','ropb11_1','pb11',0)
+               do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+               if ERR_USE
+                  close DATABASES
+                  return
+               endif
+               @ 7, 12 SAY SPACE(12)
+               WTR_NO = SPACE(5)
+               WINF = .F.
+               select PB11
+               TITAL = '代 號 名           稱'
+               TITAL1 = '===== ==============='
+               do CHK_WIN WITH 25, 'tr_no', 'tr_name', 7, 12, WINF, WTR_NO
+               R_FLG = .F.
+               do CHK_WINF WITH P_COD, WINF, .T., R_FLG
+               if R_FLG
+                  seek WTR_NO
+                  @ 7, 12 SAY TR_NAME
+                  select PB11
+                  use
+                  loop
+               endif
+               if WINF#'S'
+                  WSA_CONDI = SUBSTR(TR_NAME+SPACE(20),1,LEN(WSA_CONDI))
+               else
+                  @ 7, 12 SAY SPACE(12)
+               endif
+               select PB11
+               use
+            else
+               do CHK_PCOD WITH P_COD
+            endif
+         case R_COD=14
+            do CHK_GET WITH 7, 12, WSA_CONDI
+         case R_COD=15
+            select OD00
+            WINF = 'F'
+            TITAL = '幣別代號 幣    別 英文說明'
+            TITAL1 = '======== ======== ========'
+            do CHK_WIN WITH 27, 'od_id', "+space(5)+od_name+' '+od_name1", 7, 36, WINF, WOD_ID
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+            if R_FLG
+               seek WOD_ID
+               @ 7, 36 SAY OD_NAME
+               loop
+            endif
+            @ 7, 36 SAY OD_NAME
+            WOD_ID = OD_ID
+            if FUNC$'AE' .or. FUNC$'B'
+               dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+               = SET_DBF(1,DBF_SA+'rood20','rood20_1','od20',0)
+               do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+               if ERR_USE
+                  close DATABASES
+                  return
+               endif
+               if WOD_SATYP='2'
+                  TR_DATE = WSA_DATE
+                  set NEAR ON
+                  select OD20
+                  seek WOD_ID+TR_DATE
+                  if TR_DATE#OD_YMD .and.  .not. EOF()
+                     skip -1
+                  endif
+                  if WOD_ID#OD_ID
+                     do CHK_MSG WITH '匯率資料無小於銷貨日的資料!!'
+                     select OD00
+                     seek WOD_ID
+                  endif
+                  set NEAR OFF
+               else
+                  TR_DATE = WSA_DATE
+                  select OD20
+                  seek WOD_ID+TR_DATE
+                  if EOF()
+                     select OD00
+                     seek WOD_ID
+                  endif
+               endif
+               if WOD_SATYP='1'
+                  WSA_RATE = OD_RATE
+               else
+                  WSA_RATE = OD_RATE2
+               endif
+               select OD20
+               use
+            endif
+            if WSA_RATE=0
+               WSA_RATE = 1
+            endif
+         case R_COD=16
+            do CHK_GETN WITH 7, 45, WSA_RATE, '###.####', '0.0001,'
+         case R_COD=17
+            @ 7, 63 SAY SPACE(8)
+            do CHK_GCH1 WITH 7, 63, WSA_CHARG, .T.
+            do CHK_SCH1 WITH 7, 63, WSA_CHARG
+            if AT(WSA_CHARG,'125')#0
+               WSA_CHDAT = WSA_DATE
+            endif
+            if WSA_CHARG='2'
+               P_COD = 18
+            else
+               WSA_CHARG1 = ' '
+               P_COD = 19
+            endif
+         case R_COD=18
+            if WSA_CHARG='2'
+               if WSA_CHARG1=' '
+                  WSA_CHARG1 = '5'
+               endif
+               @ 7, 63 SAY '        '
+               do CHK_GCH2 WITH 7, 63, WSA_CHARG1, .T.
+               do CHK_SCH2 WITH 7, 63, WSA_CHARG1
+            else
+               WSA_CHARG1 = ' '
+               if &rd_up
+                  P_COD = P_COD-1
+               else
+                  P_COD = P_COD+1
+               endif
+            endif
+         case R_COD=19
+            do CHK_GETN WITH 7, 72, WSA_CHECK, '999', ''
+         case R_COD=20
+            do CHK_GET WITH 8, 12, WSA_IVNO
+         case R_COD=21
+            if WSA_CHARG1='5'
+               select SA29
+               set ORDER TO rosa29_2
+               TITAL = '信 用 狀 號 碼   開狀銀行 L/C 期限 最後船期 幣別'
+               TITAL1 = '================ ======== ======== ======== ===='
+               WINF = 'F'
+               do CHK_WINX WITH LEN(TITAL1)+2, 'sa_lcno', "sa_bano+' '+sa_ltd+' '+sa_ship+' '+od_id", 8, 36, WINF, WSA_LCNO, 'cu_no,wcu_no'
+               do CHK_PCOD WITH P_COD
+               if WINF$'E'
+                  P_COD = 0
+                  loop
+               endif
+               if WINF$'U'
+                  @ 8, 36 SAY WSA_LCNO
+                  P_COD = 19
+                  loop
+               endif
+               if WINF$'SMN'
+                  WSA_LCNO = SPACE(16)
+                  @ 8, 36 SAY WSA_LCNO
+               else
+                  WSA_LCNO = SA_LCNO
+                  if SA_SHIP<=WSA_DATE
+                     do CHK_MSG WITH '此 L/C 最後船期小於銷貨日期!!'
+                     P_COD = R_COD
+                     loop
+                  endif
+                  if WOD_ID#OD_ID
+                     do CHK_MSG WITH '幣別不符!!'
+                     P_COD = R_COD
+                     loop
+                  endif
+               endif
+               @ 8, 36 SAY WSA_LCNO
+            else
+               WSA_LCNO = SPACE(16)
+               @ 8, 36 SAY SPACE(16)
+               if &rd_up
+                  P_COD = P_COD-1
+               else
+                  P_COD = P_COD+1
+               endif
+            endif
+         case R_COD=22
+            if ' '$WSA_CHDAT .and. FUNC$'AE'
+               WSA_CHDAT = CHK_CLSD('R',WSA_DATE,WSA_CHARG,'1',WCU_DATE,IE_DATID)
+            endif
+            do CHK_GETD WITH 8, 63, WSA_CHDAT, .T., R_COD, .F.
+            if ' '$WSA_CHDAT
+               WSA_CHDAT = SPACE(8)
+            endif
+            if WSA_CHDAT#SPACE(8)
+               if WSA_CHDAT<WSA_DATE
+                  do CHK_MSG WITH '結帳日期不得小於銷貨日期'
+                  loop
+               endif
+            endif
+         case R_COD=23
+            if ' '$WSA_LTDAT
+               WSA_LTDAT = CHK_DUED('R',WSA_CHDAT,WSA_CHECK,IE_DATID)
+            endif
+            do CHK_GETD WITH 9, 12, WSA_LTDAT, .T., R_COD, .F.
+            if ' '$WSA_LTDAT
+               WSA_LTDAT = SPACE(8)
+            endif
+         case R_COD=24
+            dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+            = SET_DBF(1,DBF_SA+'robnid','robnid_1','bnid',20)
+            do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+            if ERR_USE
+               ERR_USE = .F.
+               close DATABASES
+               return
+            endif
+            WINF = 'F'
+            TITAL = '報單代號 名                                   稱'
+            TITAL1 = '======== ======================================='
+            do CHK_WIN WITH LEN(TITAL)+2, 'bn_id ', '+space(6)+bn_idna', 9, 27, WINF, WBN_ID
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .T., R_FLG
+            if R_FLG
+               @ 9, 27 SAY WBN_ID
+               use
+               loop
+            endif
+            if WINF#'S'
+               WBN_ID = BN_ID
+            endif
+            @ 9, 27 SAY WBN_ID
+            use
+         case R_COD=25
+            if  .not. EMPTY(WBN_ID)
+               do CHK_GETC WITH 9, 30, WSA_VIA, 'xx/xx/xx/xxxx/xxxxxxxx', ''
+               if &rd_up .or. &rd_esc
+                  loop
+               endif
+               if WSA_VIA='  /  /  /    /     '
+                  WBN_ID = SPACE(2)
+                  WSA_VIA = SPACE(LEN(WSA_VIA))
+               endif
+            else
+               WSA_VIA = SPACE(LEN(WSA_VIA))
+               @ 9, 30 SAY WSA_VIA
+               do CHK_PCOD WITH P_COD
+            endif
+         case R_COD=26
+            select CU02
+            WINF = 'F'
+            TITAL = '經辦代號 名      稱'
+            TITAL1 = '======== =========='
+            do CHK_WIN WITH 25, 'cu_sale', '+space(3)+cu_snam', 9, 63, WINF, WCU_SALE
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+            if R_FLG
+               @ 9, 63 SAY WCU_SALE
+               loop
+            endif
+            if WINF#'S'
+               WCU_SALE = CU_SALE
+               if WDP_NO=SPACE(5)
+                  WDP_NO = DP_NO
+               endif
+               @ 9, 63 SAY WCU_SALE+' '
+            else
+               @ 9, 63 SAY SPACE(6)
+            endif
+         case R_COD=27
+            select DP00
+            TITAL = '部門代號 名      稱'
+            TITAL1 = '======== =========='
+            WINF = 'F'
+            do CHK_WIN WITH 25, 'dp_no', 'space(03)+dp_name', 9, 70, WINF, WDP_NO
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+            if R_FLG
+               seek WDP_NO
+               @ 9, 70 SAY DP_NO
+               loop
+            endif
+            if WINF#'S'
+               WDP_NO = DP_NO
+            else
+            endif
+            @ 9, 70 SAY WDP_NO
+         case R_COD=28
+            set COLOR TO (CO_FORM)
+            @ 10, 3 SAY 'SHIP TO :'
+            set COLOR TO (CO_SAY)
+            @ 10, 12 SAY SPACE(40)
+            if WSA_SHIP=SPACE(LEN(WSA_SHIP))
+               WSA_SHIP = WCU_NO
+            endif
+            select CU00
+            WINF = 'F'
+            TITAL = '客戶代號 客戶簡稱'
+            TITAL1 = '======== ========'
+            do CHK_WIN WITH 25, 'cu_no', 'space(03)+cu_na', 10, 12, WINF, WSA_SHIP
+            R_FLG = .F.
+            do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+            if R_FLG
+               set COLOR TO (CO_FORM)
+               @ 10, 3 SAY '送貨地點:'
+               set COLOR TO (CO_SAY)
+               do CASE
+                  case WSA_ADID='1'
+                     select CU00
+                     seek WSA_SHIP
+                     W_ADD1 = CU_ADD10
+                     W_ADD2 = CU_ADD11
+                  case WSA_ADID='2'
+                     select CU00
+                     seek WSA_SHIP
+                     W_ADD1 = CU_ADD20
+                     W_ADD2 = CU_ADD21
+                  case WSA_ADID='3'
+                     dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+                     = SET_DBF(1,DBF_BA+'rocu01','rocu01_1','cu01',0)
+                     do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+                     if ERR_USE
+                        close DATABASES
+                        return
+                     endif
+                     seek WSA_SHIP+WSA_ADDR
+                     W_ADD1 = CU_ADD1
+                     W_ADD2 = CU_ADD2
+                     select CU01
+                     use
+                  otherwise
+                     W_ADD1 = WSA_ADDR1
+                     W_ADD2 = SPACE(40)
+               endcase
+               select 1
+               @ 10, 12 SAY W_ADD1
+               loop
+            endif
+            WSA_SHIP = CU_NO
+         case R_COD=29
+            set COLOR TO (CO_FORM)
+            @ 10, 3 SAY '送貨地點:'
+            set COLOR TO (CO_SAY)
+            @ 10, 12 SAY SPACE(40)
+            @ 10, 13 SAY '(1.公司 2.工廠 3.其它)' COLOR (CO_FORM)
+            do CHK_GETC WITH 10, 12, WSA_ADID, '9', '(123 ) '
+            if &rd_up
+               do CASE
+                  case WSA_ADID='1'
+                     select CU00
+                     seek WSA_SHIP
+                     W_ADD1 = CU_ADD10
+                     W_ADD2 = CU_ADD11
+                  case WSA_ADID='2'
+                     select CU00
+                     seek WSA_SHIP
+                     W_ADD1 = CU_ADD20
+                     W_ADD2 = CU_ADD21
+                  case WSA_ADID='3'
+                     dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+                     = SET_DBF(1,DBF_BA+'rocu01','rocu01_1','cu01',0)
+                     do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+                     if ERR_USE
+                        close DATABASES
+                        return
+                     endif
+                     seek WSA_SHIP+WSA_ADDR
+                     W_ADD1 = CU_ADD1
+                     W_ADD2 = CU_ADD2
+                     select CU01
+                     use
+                  otherwise
+                     W_ADD1 = WSA_ADDR1
+                     W_ADD2 = SPACE(40)
+               endcase
+               @ 10, 12 SAY W_ADD1
+            endif
+         case R_COD=30
+            if WSA_ADID=' '
+               @ 10, 12 SAY SPACE(40)
+               do CHK_GET WITH 10, 12, WSA_ADDR1
+            else
+               if WSA_ADID='3'
+                  @ 10, 12 SAY SPACE(40)
+                  dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+                  = SET_DBF(1,DBF_BA+'rocu01','rocu01_1','cu01',0)
+                  do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+                  if ERR_USE
+                     close DATABASES
+                     return
+                  endif
+                  WINF = 'F'
+                  TITAL = '編號 住                                    址'
+                  TITAL1 = '==== ========================================'
+                  do CHK_WINX WITH 55, 'cu_seq', 'space(02)+cu_add1', 10, 12, WINF, WSA_ADDR, 'cu_no,wsa_ship'
+                  if WINF$'MN'
+                     do CHK_MSG WITH '此客戶無其它地址!!'
+                     select CU01
+                     use
+                     P_COD = P_COD-1
+                     loop
+                  endif
+                  R_FLG = .F.
+                  do CHK_WINF WITH P_COD, WINF, .F., R_FLG
+                  if R_FLG
+                     seek WSA_SHIP+WSA_ADDR
+                     W_ADD1 = CU_ADD1
+                     W_ADD2 = CU_ADD2
+                     @ 10, 12 SAY WSA_ADDR
+                     select CU01
+                     use
+                     loop
+                  endif
+                  WSA_ADDR = CU_SEQ
+                  @ 10, 12 SAY WSA_ADDR
+               else
+                  do CHK_PCOD WITH P_COD
+               endif
+            endif
+            do CASE
+               case WSA_ADID='1'
+                  select CU00
+                  seek WSA_SHIP
+                  W_ADD1 = CU_ADD10
+                  W_ADD2 = CU_ADD11
+               case WSA_ADID='2'
+                  select CU00
+                  seek WSA_SHIP
+                  W_ADD1 = CU_ADD20
+                  W_ADD2 = CU_ADD21
+               case WSA_ADID='3'
+                  select CU01
+                  seek WSA_SHIP+WSA_ADDR
+                  W_ADD1 = CU_ADD1
+                  W_ADD2 = CU_ADD2
+                  use
+               otherwise
+                  W_ADD1 = WSA_ADDR1
+                  W_ADD2 = SPACE(40)
+            endcase
+            @ 10, 12 SAY W_ADD1
+         case R_COD=31
+            do CHK_GETC WITH 10, 63, WSA_SHIPNO, '@X', ' '
+         case R_COD=-1 .or. R_COD=32
+            if R_COD=-1
+               select AR08
+               seek WAR_RENO+WSA_ID
+               WAC_NO1 = AC_NO1
+               WAC_NO2 = AC_NO2
+            endif
+            select 1
+            if FUNC='A'
+               do WHILE .T.
+                  do CHK_NOA WITH WSA_DATE, 'SA', 'A', WSA_NO
+                  select 1
+                  seek WSA_NO
+                  if EOF()
+                     exit
+                  endif
+               enddo
+               @ 4, 12 SAY WSA_NO
+               select 1
+               append BLANK
+            endif
+            select 1
+            if FUNC='E'
+               seek WSA_NO
+               if  .not. EOF()
+                  P_COD = 1
+                  do CHK_MSG WITH '單號不得重覆'
+                  loop
+               endif
+               append BLANK
+            endif
+            if _RLOCK(30)
+               return
+            endif
+            replace SA_NO WITH WSA_NO
+            replace CU_NO WITH WCU_NO
+            replace CU_SALE WITH WCU_SALE
+            replace SA_ADID WITH WSA_ADID
+            replace SA_ADDR WITH WSA_ADDR
+            replace SA_DATE WITH WSA_DATE
+            replace OD_ID WITH WOD_ID
+            replace SA_RATE WITH WSA_RATE
+            replace SA_AMT WITH WSA_AMT
+            replace SA_PRE WITH WSA_PRE
+            replace SA_TAX WITH WSA_TAX
+            replace SA_TAXID WITH WSA_TAXID
+            replace SA_OTHE WITH WSA_OTHE
+            replace SA_CHARG WITH WSA_CHARG
+            replace SA_CHARG1 WITH WSA_CHARG1
+            replace SA_CHDAT WITH WSA_CHDAT
+            replace SA_IVNO WITH WSA_IVNO
+            replace SA_IVNO1 WITH WSA_IVNO1
+            replace SA_LTDAT WITH WSA_LTDAT
+            replace OD_SATYP WITH WOD_SATYP
+            replace SA_BIL WITH WSA_BIL
+            replace IV_PAGE WITH WIV_PAGE
+            replace SA_ID WITH WSA_ID
+            replace SA_LCNO WITH WSA_LCNO
+            replace SA_ADDR1 WITH WSA_ADDR1
+            replace SA_CONDI WITH WSA_CONDI
+            replace DP_NO WITH WDP_NO
+            replace SA_COMM WITH WSA_COMM
+            replace SA_AGENT WITH WSA_AGENT
+            replace SA_SHIPNO WITH WSA_SHIPNO
+            replace SA_CHECK WITH WSA_CHECK
+            replace SA_SHIP WITH WSA_SHIP
+            replace SA_VIA WITH WSA_VIA
+            replace BN_ID WITH WBN_ID
+            replace IV_CUNO WITH WIV_CUNO
+            if FUNC$'EA'
+               FSA_BIL = WSA_BIL
+               WSA_SEQ = SPACE(3)
+               CNT = 1
+               do ROSA00_D WITH 'A'
+               select 2
+               seek WSA_NO
+               TEL_NO = EL_NO
+               if EOF()
+                  do CHK_NOD WITH WSA_DATE, 'SA', 'A', WSA_NO
+                  select 1
+                  do WHILE _RLOCK(30)
+                  enddo
+                  delete
+                  unlock
+                  if  .not. BOF()
+                     skip -1
+                  else
+                     goto BOTTOM
+                  endif
+                  exit
+               else
+               endif
+            endif
+            if FUNC='B'
+               select AR08
+               seek WAR_RENO+FSA_ID
+               FAC_NO1 = AC_NO1
+               FAC_NO2 = AC_NO2
+               FLG_NEW = .F.
+               if FSA_TAXID#WSA_TAXID
+                  FLG_NEW = .T.
+                  T_AMT = 0
+               endif
+               select 2
+               seek WSA_NO
+               TEL_NO = EL_NO
+               do WHILE  .not. EOF() .and. SA_NO=WSA_NO
+                  if FLG_NEW
+                     if WSA_SIGN#SPACE(8) .and. WSA_SIGN#'  /  /  '
+                        W_QTY = SA_ACQTY
+                     else
+                        W_QTY = SA_QTY
+                     endif
+                     if SA_CH#'N'
+                        WSA_SEQ = SA_SEQ
+                        if WOD_ID=IE_ODID
+                           T_AMT = T_AMT+CHK_RND(SA_PRICE*SA_QTY)
+                        else
+                           T_AMT = T_AMT+ROUND(SA_PRICE*SA_QTY,2)
+                        endif
+                        select SA05
+                        seek WSA_NO+WSA_SEQ
+                        do WHILE  .not. EOF() .and. SA_NO+SA_SEQ=WSA_NO+WSA_SEQ
+                           if WOD_ID=IE_ODID
+                              T_AMT = T_AMT+CHK_RND(SA_PRICE*SA_QTY)
+                           else
+                              T_AMT = T_AMT+ROUND(SA_PRICE*SA_QTY,2)
+                           endif
+                           skip
+                        enddo
+                        select SA06
+                        seek WSA_NO+WSA_SEQ
+                        do WHILE  .not. EOF() .and. SA_NO+SA_SEQ=WSA_NO+WSA_SEQ
+                           if WOD_ID=IE_ODID
+                              T_AMT = T_AMT+CHK_RND(SA_PRICE*SA_QTY)
+                           else
+                              T_AMT = T_AMT+ROUND(SA_PRICE*SA_QTY,2)
+                           endif
+                           skip
+                        enddo
+                     endif
+                  endif
+                  select 2
+                  do WHILE _RLOCK(30)
+                  enddo
+                  replace CU_NO WITH WCU_NO
+                  replace SA_DATE WITH WSA_DATE
+                  replace OD_ID WITH WOD_ID
+                  replace SA_CHARG WITH WSA_CHARG
+                  replace SA_CHDAT WITH WSA_CHDAT
+                  replace SA_BIL WITH WSA_BIL
+                  replace SA_RATE WITH WSA_RATE
+                  replace SA_ID WITH WSA_ID
+                  replace SA_TAXID WITH WSA_TAXID
+                  replace DP_NO WITH WDP_NO
+                  replace CU_SALE WITH WCU_SALE
+                  unlock
+                  select 2
+                  skip
+               enddo
+               select SA05
+               seek WSA_NO
+               do WHILE  .not. EOF() .and. SA_NO=WSA_NO
+                  do WHILE _RLOCK(30)
+                  enddo
+                  replace SA_DATE WITH WSA_DATE
+                  replace OD_ID WITH WOD_ID
+                  replace SA_TAXID WITH WSA_TAXID
+                  replace SA_RATE WITH WSA_RATE
+                  replace SA_ID WITH WSA_ID
+                  replace CU_NO WITH WCU_NO
+                  replace DP_NO WITH WDP_NO
+                  replace CU_SALE WITH WCU_SALE
+                  unlock
+                  select SA05
+                  skip
+               enddo
+               select SA06
+               seek WSA_NO
+               do WHILE  .not. EOF() .and. SA_NO=WSA_NO
+                  do WHILE _RLOCK(30)
+                  enddo
+                  replace SA_DATE WITH WSA_DATE
+                  replace OD_ID WITH WOD_ID
+                  replace SA_TAXID WITH WSA_TAXID
+                  replace SA_RATE WITH WSA_RATE
+                  replace SA_ID WITH WSA_ID
+                  replace CU_NO WITH WCU_NO
+                  replace DP_NO WITH WDP_NO
+                  replace CU_SALE WITH WCU_SALE
+                  unlock
+                  select SA06
+                  skip
+               enddo
+               if FLG_NEW
+                  do CASE
+                     case WSA_TAXID='4'
+                        if WOD_ID=IE_ODID
+                           T_AMT = CHK_RND(T_AMT)
+                           WSA_AMT = CHK_RND(T_AMT/(1+TA_TAX))
+                        else
+                           WSA_AMT = ROUND(T_AMT*WSA_RATE/(1+TA_TAX)/WSA_RATE,2)
+                        endif
+                        if WSA_PRE>0 .and. WSA_PRE<WSA_AMT
+                           if WOD_ID=IE_ODID
+                              WSA_TAX = ROUND((WSA_AMT-WSA_PRE)*TA_TAX,0)
+                           else
+                              WSA_TAX = ROUND((WSA_AMT-WSA_PRE)*WSA_RATE*TA_TAX/WSA_RATE,2)
+                           endif
+                        else
+                           WSA_TAX = T_AMT-WSA_AMT
+                        endif
+                     case WSA_TAXID='3'
+                        WSA_AMT = T_AMT
+                        if WSA_PRE>=WSA_AMT
+                           if WOD_ID=IE_ODID
+                              WSA_TAX = CHK_RND(WSA_AMT*TA_TAX)
+                           else
+                              WSA_TAX = ROUND(WSA_AMT*WSA_RATE*TA_TAX/WSA_RATE,2)
+                           endif
+                        else
+                           if WOD_ID=IE_ODID
+                              WSA_TAX = CHK_RND((WSA_AMT-WSA_PRE)*TA_TAX)
+                           else
+                              WSA_TAX = ROUND((WSA_AMT-WSA_PRE)*WSA_RATE*TA_TAX/WSA_RATE,2)
+                           endif
+                        endif
+                     otherwise
+                        WSA_AMT = T_AMT
+                        WSA_TAX = 0
+                  endcase
+               endif
+               if WOD_ID=IE_ODID
+                  WSA_CAMT = CHK_RND(WSA_COMM*WSA_AMT*0.01)
+               else
+                  WSA_CAMT = ROUND(WSA_COMM*WSA_AMT*0.01,2)
+               endif
+               select 1
+               replace SA_AMT WITH WSA_AMT
+               replace SA_TAX WITH WSA_TAX
+               replace SA_CAMT WITH WSA_CAMT
+            endif
+            WSA_OTHE = 0
+            dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+            = SET_DBF(1,DBF_SA+'rosa09','rosa09_1','sa09',20)
+            do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+            if ERR_USE
+               close DATABASES
+               return
+            endif
+            select SA09
+            seek TSA_TYPE+WSA_NO
+            do WHILE  .not. EOF() .and. SA_TYPE+SA_NO=TSA_TYPE+WSA_NO
+               if EX_CHARG$'Y'
+                  WSA_OTHE = WSA_OTHE+EX_AMT
+               endif
+               skip
+            enddo
+            select SA09
+            use
+            select 1
+            replace SA_OTHE WITH WSA_OTHE
+            if TC_PR='Y'
+               do ROSA00_E
+            endif
+            select SA29
+            set ORDER TO rosa29_1
+            if FSA_LCNO#SPACE(LEN(WSA_LCNO))
+               seek FSA_LCNO
+               if  .not. EOF()
+                  do WHILE _RLOCK(30)
+                  enddo
+                  replace SA_ACAMT WITH SA_ACAMT-FSA_ACAMT
+                  unlock
+               endif
+            endif
+            if WSA_LCNO#SPACE(LEN(WSA_LCNO))
+               seek WSA_LCNO
+               if  .not. EOF()
+                  do WHILE _RLOCK(30)
+                  enddo
+                  replace SA_ACAMT WITH SA_ACAMT+(WSA_AMT+WSA_TAX+WSA_OTHE-WSA_PRE)
+                  unlock
+               endif
+            endif
+            select 1
+            if WSA_SURE='Y' .and. FUNC='B' .and.  .not. FSA_ID$'34'
+               if IE_CLSNOTE='1'
+                  select AR00
+                  seek FSA_BIL+WSA_NO+' '+WAR_RENO
+                  WAC_VNO = AC_VNO
+                  if  .not. EOF()
+                     if AR_SURE#' '
+                        do CHK_MSG WITH '此筆應收憑單已確認!!'
+                     else
+                        if WSA_AMT=0 .and. WSA_OTHE=0
+                           WAR_DOCU = AR_DOCU
+                           select AR06
+                           seek WAR_DOCU
+                           do WHILE  .not. EOF() .and. AR_DOCU=WAR_DOCU
+                              do WHILE _RLOCK(30)
+                              enddo
+                              delete
+                              unlock
+                              skip
+                           enddo
+                           select AR00
+                           do WHILE _RLOCK(30)
+                           enddo
+                           delete
+                           unlock
+                        endif
+                     endif
+                  endif
+               else
+                  dimension DBF_ARY[ 1], TAG_ARY[ 1], ALIAS_ARY[ 1], ANO_ARY[ 1]
+                  = SET_DBF(1,DBF_FI+'roariv','roariv_1','ariv',18)
+                  do CHK_OPEN WITH DBF_ARY, TAG_ARY, ALIAS_ARY, ANO_ARY
+                  if ERR_USE
+                     close DATABASES
+                     return
+                  endif
+                  select ARIV
+                  seek SA00.CU_NO+SA00.SA_NO+' S1'
+                  do WHILE  .not. EOF()
+                     select AR00
+                     seek FSA_BIL+ARIV.IV_NO+'S6'
+                     WAC_VNO = AC_VNO
+                     if  .not. EOF()
+                        if AR_SURE#' '
+                           do CHK_MSG WITH '此筆應收憑單已確認!!'
+                        else
+                           if WSA_AMT=0 .and. WSA_OTHE=0
+                              WAR_DOCU = AR_DOCU
+                              select AR06
+                              seek WAR_DOCU
+                              do WHILE  .not. EOF() .and. AR_DOCU=WAR_DOCU
+                                 do WHILE _RLOCK(30)
+                                 enddo
+                                 delete
+                                 unlock
+                                 skip
+                              enddo
+                              select AR00
+                              do WHILE _RLOCK(30)
+                              enddo
+                              delete
+                              unlock
+                           endif
+                        endif
+                     endif
+                     select ARIV
+                     skip IN ARIV
+                  enddo
+                  use IN ARIV
+               endif
+            endif
+            if WSA_SURE='Y' .and. WSA_ID$'12' .and. (WSA_AMT>0 .or. WSA_OTHE#0)
+               if FUNC$'AE'
+                  FLG_YN = .F.
+               else
+                  FLG_YN = .T.
+               endif
+               FLG_IVYN = .T.
+               do ROSA00_R
+            endif
+            exit
+      endcase
+   enddo
+   if FUNC='B'
+      return
+   endif
+enddo
+return
